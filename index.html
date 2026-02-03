@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Will You Be My Valentine?</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Splash Screen Container */
+      .splash-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition:
+          opacity 1s ease,
+          visibility 1s ease;
+      }
+
+      /* Image Splash Screens */
+      .image-splash {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 1s ease,
+          visibility 1s ease;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 93, 143, 0.9),
+          rgba(255, 151, 183, 0.9)
+        );
+      }
+
+      .image-splash.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Splash Image Styles */
+      .splash-image {
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 8px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+          0 0 40px rgba(255, 255, 255, 0.5),
+          0 20px 60px rgba(0, 0, 0, 0.3);
+        margin-bottom: 30px;
+        transform: scale(0.5);
+        opacity: 0;
+        animation: splashImageAppear 2s cubic-bezier(0.68, -0.55, 0.27, 1.55)
+          forwards;
+      }
+
+      @keyframes splashImageAppear {
+        0% {
+          transform: scale(0.5) rotate(-180deg);
+          opacity: 0;
+        }
+        70% {
+          transform: scale(1.1) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+
+      .splash-text {
+        font-size: 3.5rem;
+        color: white;
+        text-align: center;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 10px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: splashTextAppear 1.5s ease 0.8s forwards;
+      }
+
+      @keyframes splashTextAppear {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .splash-subtext {
+        font-size: 1.8rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: splashSubtextAppear 1.5s ease 1.2s forwards;
+      }
+
+      @keyframes splashSubtextAppear {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .splash-counter {
+        position: absolute;
+        bottom: 30px;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 8px 20px;
+        border-radius: 20px;
+        backdrop-filter: blur(5px);
+      }
+
+      /* Floating hearts in splash */
+      .splash-heart {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 24px;
+        animation: splashHeartFloat 8s linear infinite;
+        z-index: -1;
+      }
+
+      @keyframes splashHeartFloat {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Animated background hearts */
+      .heart-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+      }
+
+      .heart {
+        position: absolute;
+        color: rgba(255, 105, 180, 0.3);
+        font-size: 20px;
+        animation: float 15s infinite linear;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.7;
+        }
+        90% {
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Main content - hidden initially */
+      .main-content {
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 1s ease,
+          visibility 1s ease;
+      }
+
+      .main-content.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Main container */
+      .container {
+        max-width: 800px;
+        width: 90%;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        padding: 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin: 40px auto;
+        transform: translateY(30px);
+        animation: containerAppear 1s ease forwards;
+      }
+
+      @keyframes containerAppear {
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      /* Header section */
+      .header {
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        color: #e63946;
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .name {
+        color: #ff5d8f;
+        font-size: 3.2rem;
+        font-weight: 700;
+        margin: 10px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .question {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 40px;
+      }
+
+      /* Button styles */
+      .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 18px 40px;
+        font-size: 1.5rem;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-width: 160px;
+      }
+
+      .yes-btn {
+        background: linear-gradient(to right, #ff5d8f, #ff97b7);
+        color: white;
+      }
+
+      .no-btn {
+        background: linear-gradient(to right, #a8dadc, #457b9d);
+        color: white;
+      }
+
+      .btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      /* Persuasion interface */
+      .persuasion {
+        display: none;
+        background: rgba(255, 182, 193, 0.95);
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 30px;
+        animation: fadeIn 0.8s;
+      }
+
+      .persuasion h2 {
+        color: #e63946;
+        margin-bottom: 15px;
+      }
+
+      .persuasion p {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      /* Envelope pop-up */
+      .envelope-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.5s;
+      }
+
+      .envelope {
+        width: 90%;
+        max-width: 600px;
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        position: relative;
+        animation: envelopeAppear 0.7s;
+      }
+
+      @keyframes envelopeAppear {
+        0% {
+          transform: scale(0.5) rotate(-5deg);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      .envelope-header {
+        background: linear-gradient(to right, #ff5d8f, #ff97b7);
+        padding: 25px;
+        color: white;
+        text-align: center;
+        position: relative;
+      }
+
+      .envelope-header i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .envelope-header h2 {
+        font-size: 2.2rem;
+      }
+
+      .letter {
+        padding: 30px;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: #333;
+        text-align: left;
+        background: #fffaf0;
+        min-height: 300px;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+
+      .letter p {
+        margin-bottom: 15px;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+      }
+
+      /* Celebration styles */
+      .celebrate {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 5;
+        display: none;
+      }
+
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: #ff5d8f;
+        animation: confettiFall 5s linear infinite;
+      }
+
+      .confetti:nth-child(2n) {
+        background-color: #ffafcc;
+      }
+
+      .confetti:nth-child(3n) {
+        background-color: #a8dadc;
+      }
+
+      .confetti:nth-child(4n) {
+        background-color: #ffd166;
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(-100px) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .splash-image {
+          width: 220px;
+          height: 220px;
+        }
+
+        .splash-text {
+          font-size: 2.5rem;
+        }
+
+        .splash-subtext {
+          font-size: 1.4rem;
+        }
+
+        .container {
+          padding: 25px;
+          width: 95%;
+        }
+
+        h1 {
+          font-size: 2.2rem;
+        }
+
+        .name {
+          font-size: 2.5rem;
+        }
+
+        .question {
+          font-size: 1.5rem;
+        }
+
+        .btn {
+          padding: 15px 30px;
+          font-size: 1.3rem;
+          min-width: 140px;
+        }
+
+        .buttons {
+          gap: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .splash-image {
+          width: 180px;
+          height: 180px;
+          border-width: 6px;
+        }
+
+        .splash-text {
+          font-size: 2rem;
+        }
+
+        .splash-subtext {
+          font-size: 1.2rem;
+        }
+
+        .buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 250px;
+        }
+
+        .splash-counter {
+          font-size: 1rem;
+          padding: 6px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Splash Screen Container -->
+    <div class="splash-container" id="splashContainer">
+      <!-- First Image Splash -->
+      <div class="image-splash" id="imageSplash1">
+        <img
+          src="./me.jpeg"
+          alt="My Beautiful Love"
+          class="splash-image"
+          id="splashImage1"
+        />
+        <div class="splash-text">My Sunshine ☀️</div>
+        <div class="splash-subtext">You light up my world</div>
+        <div class="splash-counter">Memory 1 of 2</div>
+      </div>
+
+      <!-- Second Image Splash -->
+      <div class="image-splash" id="imageSplash2">
+        <img
+          src="./me.jpeg"
+          alt="My Amazing Valentine"
+          class="splash-image"
+          id="splashImage2"
+        />
+        <div class="splash-text">My Everything 💖</div>
+        <div class="splash-subtext">Every moment with you is special</div>
+        <div class="splash-counter">Memory 2 of 2</div>
+      </div>
+    </div>
+
+    <!-- Animated background hearts -->
+    <div class="heart-bg" id="heartBg"></div>
+
+    <!-- Celebration confetti -->
+    <div class="celebrate" id="celebrate"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+      <!-- Main container -->
+      <div class="container" id="mainContainer">
+        <div class="header">
+          <h1>Will You Be My Valentine?</h1>
+          <div class="name" id="valentineName">Irene</div>
+          <p class="question">My Beautiful Mummy!</p>
+        </div>
+
+        <div class="buttons">
+          <button class="btn yes-btn" id="yesBtn">
+            <i class="fas fa-heart"></i> Yes!
+          </button>
+          <button class="btn no-btn" id="noBtn">
+            <i class="fas fa-times"></i> No
+          </button>
+        </div>
+
+        <!-- Persuasion section -->
+        <div class="persuasion" id="persuasion">
+          <h2>Please reconsider...!</h2>
+          <p>Please give me a chance to show you how much I love you...!</p>
+          <div class="buttons">
+            <button class="btn yes-btn" id="secondYesBtn">
+              <i class="fas fa-heart"></i> Okay, Yes!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Envelope pop-up -->
+    <div class="envelope-container" id="envelopeContainer">
+      <div class="envelope">
+        <div class="envelope-header" id="envelopeHeader">
+          <i class="fas fa-envelope-open-text"></i>
+          <h2 id="envelopeTitle">A Letter For You</h2>
+          <button class="close-btn" id="closeBtn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="letter" id="letterContent">
+          <!-- Letter content will be inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // DOM Elements
+      const splashContainer = document.getElementById("splashContainer");
+      const imageSplash1 = document.getElementById("imageSplash1");
+      const imageSplash2 = document.getElementById("imageSplash2");
+      const splashImage1 = document.getElementById("splashImage1");
+      const splashImage2 = document.getElementById("splashImage2");
+      const mainContent = document.getElementById("mainContent");
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+      const secondYesBtn = document.getElementById("secondYesBtn");
+      const persuasion = document.getElementById("persuasion");
+      const envelopeContainer = document.getElementById("envelopeContainer");
+      const envelopeHeader = document.getElementById("envelopeHeader");
+      const envelopeTitle = document.getElementById("envelopeTitle");
+      const letterContent = document.getElementById("letterContent");
+      const closeBtn = document.getElementById("closeBtn");
+      const celebrate = document.getElementById("celebrate");
+      const heartBg = document.getElementById("heartBg");
+      const valentineName = document.getElementById("valentineName");
+
+      // Create floating hearts for background
+      function createFloatingHearts() {
+        for (let i = 0; i < 30; i++) {
+          const heart = document.createElement("div");
+          heart.innerHTML = "❤️";
+          heart.classList.add("heart");
+
+          // Random position and animation delay
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.animationDelay = `${Math.random() * 15}s`;
+          heart.style.fontSize = `${Math.random() * 20 + 15}px`;
+
+          heartBg.appendChild(heart);
+        }
+      }
+
+      // Create splash screen floating hearts
+      function createSplashHearts() {
+        for (let i = 0; i < 20; i++) {
+          const heart = document.createElement("div");
+          heart.innerHTML = "❤️";
+          heart.classList.add("splash-heart");
+
+          // Random position and animation
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.animationDelay = `${Math.random() * 8}s`;
+          heart.style.fontSize = `${Math.random() * 20 + 15}px`;
+
+          splashContainer.appendChild(heart);
+        }
+      }
+
+      // Create celebration confetti
+      function createConfetti() {
+        celebrate.style.display = "block";
+
+        for (let i = 0; i < 150; i++) {
+          const confetti = document.createElement("div");
+          confetti.classList.add("confetti");
+
+          // Random position and animation
+          confetti.style.left = `${Math.random() * 100}%`;
+          confetti.style.animationDelay = `${Math.random() * 5}s`;
+          confetti.style.width = `${Math.random() * 10 + 5}px`;
+          confetti.style.height = `${Math.random() * 10 + 5}px`;
+
+          celebrate.appendChild(confetti);
+        }
+      }
+
+      // Splash screen sequence function
+      function startSplashSequence() {
+        // Show first image splash immediately
+        imageSplash1.classList.add("active");
+
+        // Sequence timing
+        const sequence = [
+          {
+            delay: 3500, // First image shows for 3.5 seconds
+            action: () => {
+              imageSplash1.classList.remove("active");
+              imageSplash2.classList.add("active");
+            },
+          },
+          {
+            delay: 3500, // Second image shows for 3.5 seconds
+            action: () => {
+              imageSplash2.classList.remove("active");
+              splashContainer.style.opacity = "0";
+              splashContainer.style.visibility = "hidden";
+              mainContent.classList.add("active");
+            },
+          },
+        ];
+
+        let totalDelay = 0;
+        sequence.forEach((step) => {
+          totalDelay += step.delay;
+          setTimeout(step.action, totalDelay);
+        });
+      }
+
+      // Happy letter content with celebratory emojis
+      const happyLetter = `
+            <p>My sweet <strong>${valentineName.textContent}</strong> ❤️😘,</p>
+            
+            <p>You have no idea how happy you've made me by saying YES! 🎉🎊🥳 My heart is bursting with joy and excitement! 😘💖✨</p>
+            
+            <p>From the moment I met you, I knew there was something special about you. Your smile brightens my darkest days, your laughter is my favorite melody, and your kindness touches my soul in ways I can't even describe. 🌈💫</p>
+            
+            <p>I promise to cherish you, respect you, and make you feel loved every single day. I can't wait to create beautiful memories together and see where this wonderful journey takes us. 😍💑🌹</p>
+            
+            <p>Thank you for giving me this chance to be by your side. You've made this the best Valentine's Day of my life! 💝🎁❤️</p>
+            
+            <p>With all my love,</p>
+            <p><strong>Your Baby Boy</strong> 😘❤️💕</p>
+        `;
+
+      // Sad letter content
+      const sadLetter = `
+            <p>Dear <strong>${valentineName.textContent}</strong>,</p>
+            
+            <p>I understand and respect your decision, though my heart aches more than I can express. 💔😢</p>
+            
+            <p>I had hoped to share something special with you - to laugh with you on sunny days, comfort you on rainy ones, and build memories that would last a lifetime. I truly believe we could have had something beautiful. 🌧️☀️</p>
+            
+            <p>Please know that my feelings for you are genuine. I've admired you from afar for so long, gathering the courage to ask you this question today. You're an incredible person who deserves all the happiness in the world. 🌟</p>
+            
+            <p>Thank you for at least considering my request and for the opportunity to express my feelings. I will always cherish the person you are and wish you nothing but the absolute best in life. 🙏</p>
+            
+            <p>With a bittersweet heart,</p>
+            <p><strong>Someone Who Truly Cares</strong> 💔</p>
+        `;
+
+      // Show the persuasion interface
+      noBtn.addEventListener("click", function () {
+        persuasion.style.display = "block";
+
+        // Animate the no button to move away when hovered
+        noBtn.style.position = "relative";
+
+        // Make the "No" button move away from cursor
+        document.addEventListener("mousemove", function (e) {
+          const rect = noBtn.getBoundingClientRect();
+          const x = e.clientX;
+          const y = e.clientY;
+
+          // Check if cursor is near the button
+          if (
+            x > rect.left - 50 &&
+            x < rect.right + 50 &&
+            y > rect.top - 50 &&
+            y < rect.bottom + 50
+          ) {
+            // Move button away from cursor
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const deltaX = x - centerX;
+            const deltaY = y - centerY;
+
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = 100;
+
+            if (distance < maxDistance) {
+              const moveX =
+                (maxDistance - distance) * (deltaX / distance) * 0.5;
+              const moveY =
+                (maxDistance - distance) * (deltaY / distance) * 0.5;
+
+              noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            }
+          }
+        });
+      });
+
+      // Handle first "Yes" button click
+      yesBtn.addEventListener("click", function () {
+        envelopeTitle.textContent = "Hurray...! 💖🎉🥳";
+        envelopeHeader.style.background =
+          "linear-gradient(to right, #ff5d8f, #ff97b7)";
+        letterContent.innerHTML = happyLetter;
+        envelopeContainer.style.display = "flex";
+        createConfetti();
+
+        // Add extra hearts animation
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => {
+            const heart = document.createElement("div");
+            heart.innerHTML = "❤️";
+            heart.style.position = "fixed";
+            heart.style.fontSize = "25px";
+            heart.style.color = "#ff5d8f";
+            heart.style.left = `${Math.random() * 100}%`;
+            heart.style.top = `${Math.random() * 100}%`;
+            heart.style.zIndex = "1000";
+            heart.style.pointerEvents = "none";
+            heart.style.animation = `float 3s forwards`;
+
+            document.body.appendChild(heart);
+
+            // Remove after animation
+            setTimeout(() => {
+              heart.remove();
+            }, 3000);
+          }, i * 100);
+        }
+      });
+
+      // Handle second chance "Yes" button click
+      secondYesBtn.addEventListener("click", function () {
+        envelopeTitle.textContent = "You Changed Your Mind! 💕✨🎊";
+        envelopeHeader.style.background =
+          "linear-gradient(to right, #ff5d8f, #ff97b7)";
+        letterContent.innerHTML = happyLetter;
+        envelopeContainer.style.display = "flex";
+        createConfetti();
+      });
+
+      // Close envelope pop-up
+      closeBtn.addEventListener("click", function () {
+        envelopeContainer.style.display = "none";
+      });
+
+      // Close envelope if clicked outside
+      envelopeContainer.addEventListener("click", function (e) {
+        if (e.target === envelopeContainer) {
+          envelopeContainer.style.display = "none";
+        }
+      });
+
+      // Setup splash images - replace with your actual image paths
+      function setupSplashImages() {
+        // Replace these with your actual image URLs
+        const imageUrls = [
+          "./irene1.jpeg", // First splash image - replace with your actual image
+          "./irene2.jpeg", // Second splash image - replace with your actual image
+        ];
+
+        // Set image sources
+        splashImage1.src = imageUrls[0];
+        splashImage2.src = imageUrls[1];
+
+        // Add error handling
+        splashImage1.onerror = function () {
+          console.log("First splash image failed to load");
+          this.src =
+            "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80";
+        };
+
+        splashImage2.onerror = function () {
+          console.log("Second splash image failed to load");
+          this.src =
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80";
+        };
+      }
+
+      // Initialize the page
+      window.addEventListener("DOMContentLoaded", function () {
+        createFloatingHearts();
+        createSplashHearts();
+        setupSplashImages();
+        startSplashSequence();
+      });
+
+      // Instructions for adding your own images
+      console.log("To add your girlfriend's images:");
+      console.log(
+        "1. Replace the image URLs in the 'imageUrls' array in setupSplashImages()",
+      );
+      console.log("2. For local images, use paths like './image1.jpg'");
+      console.log(
+        "3. Update the splash text and subtext in the HTML to personalize them",
+      );
+    </script>
+  </body>
+</html>
